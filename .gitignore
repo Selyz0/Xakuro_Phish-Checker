@@ -1,3 +1,9 @@
+# production
+/build
+
+# misc
+.DS_Store
+
 # Logs
 logs
 *.log
@@ -78,7 +84,7 @@ typings/
 # Next.js build output
 .next
 
-# Nuxt.js build / generate output
+# Nuxt.js build / generate outputa
 .nuxt
 dist
 
@@ -102,3 +108,18 @@ dist
 
 # TernJS port file
 .tern-port
+Footer
+© 2022 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+mws-2022/.gitignore at main · Selyz0/mws-2022
