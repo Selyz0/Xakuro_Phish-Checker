@@ -12,9 +12,7 @@ const contextMenusModule = require('./contextMenusScript.js')
         sender.tab ? 'Con' : 'Pop'
       }, my name is Bac. I am from Background. It's great to hear from you.`;
 
-      // Log message coming from the `request` parameter
       console.log(request.payload.message);
-      // Send a response message
       sendResponse({
         message,
       });
@@ -44,6 +42,7 @@ const contextMenusModule = require('./contextMenusScript.js')
     console.log(`You clicked ${item.menuItemId} button.`);
 
     if (item.menuItemId == 'SAVE'){
+      // TODO: 保存処理を呼び出す
       contextMenusModule.saveWebInfo.saveUrl('url')
       console.log('Saved some information.');
     }

@@ -25,14 +25,14 @@ const popupMenusModule = require('./popupMenusScript.js');
 
   /**
    * ポップアップの情報を設定
-   * (必要に応じてメソッド名などの変更)
+   * TODO: (必要に応じてメソッド名などの変更)
    * @param {string} initialValue 初期値
    */
   function setupPopupMenus(initialValue = 'undefined') {
     document.getElementById('saveLocation').innerHTML = initialValue;
 
     document.getElementById('judgingBtn').addEventListener('click', () => {
-      // 判定処理を呼び出す
+      // TODO: 判定処理を呼び出す
 
       // 以下はサンプルとして記述している
       popupMenusModule.popupMenus.judgeWebPage()
@@ -40,7 +40,7 @@ const popupMenusModule = require('./popupMenusScript.js');
     });
 
     document.getElementById('savingBtn').addEventListener('click', () => {
-      // 保存処理を呼び出す
+      // TODO: 保存処理を呼び出す
 
       // 以下はサンプルとして記述している
       popupMenusModule.popupMenus.saveWebPageInfo()
@@ -48,7 +48,7 @@ const popupMenusModule = require('./popupMenusScript.js');
     });
 
     document.getElementById('settingsBtn').addEventListener('click', () => {
-      // 保存先変更処理を呼び出す
+      // TODO: 保存先変更処理を呼び出す
 
       // 以下はサンプルとして記述している
       popupMenusModule.popupMenus.changeSettings()
