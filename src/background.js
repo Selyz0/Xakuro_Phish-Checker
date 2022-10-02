@@ -38,14 +38,80 @@ const contextMenusModule = require('./contextMenusScript.js')
     });
   });
 
-  chrome.contextMenus.onClicked.addListener(item => {
+  chrome.contextMenus.onClicked.addListener(async (item, tab) => {
     console.log(`You clicked ${item.menuItemId} button.`);
 
     if (item.menuItemId == 'SAVE'){
-      // TODO: 保存処理を呼び出す
-      contextMenusModule.saveWebInfo.saveUrl('url')
+      // デバッガアタッチ
+      chrome.debugger.attach({ tabId: tab.id }, '1.3', async () => {
+        console.log('attach - ok');
+    
+        // デバッガ起動待機
+        await new Promise((resolve) => setTimeout(resolve, 500));
+    
+        // レイアウト情報取得
+        chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.getLayoutMetrics', {}, (metrics) => {
+          // スクリーンショットパラメータ作成
+          const params = {
+            format: 'png',
+            quality: 50,
+            clip: {
+            x: 0,
+            y: 0,
+            width:  metrics.cssContentSize.width,
+            height: metrics.cssContentSize.height,
+            scale: 1
+            },
+            captureBeyondViewport: true
+          }
+      
+          // スクリーンショット撮影
+          chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.captureScreenshot', params, (result) => {
+            // 画像保存
+            chrome.tabs.sendMessage(
+              tab.id,
+              {
+                type: 'GETDOC',
+                payload: {
+                  data: result,
+                  message : 'Want a webpage document.',
+                },
+              },
+              (response) => {
+                // デバッガでタッチ
+                chrome.debugger.detach({ tabId: tab.id }, () => {
+                  console.log('detach ok')
+                });
+            });
+          });
+        });
+      
+      // 以下はサンプルとして記述している
+      //popupMenusModule.popupMenus.saveWebPageInfo()
+      //updateSettings({type: 'SAVE'})
+      });
       console.log('Saved some information.');
     }
     return true;
   });
 }
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status != 'complete'){
+    return
+  }
+
+  console.log('Created tab');
+  chrome.tabs.sendMessage(
+    tabId,
+    {
+      type: 'LOADEDPAGE',
+      payload: {
+        message : 'Web page was loaded.',
+      },
+    },
+    (response) => {
+    }
+  );
+  return true
+});
