@@ -31,11 +31,18 @@ const popupMenusModule = require('./popupMenusScript.js');
   function setupPopupMenus(initialValue = 'undefined') {
     document.getElementById('saveLocation').innerHTML = initialValue;
 
-    document.getElementById('judgingBtn').addEventListener('click', () => {
+    document.getElementById('judgingBtn').addEventListener('click', async () => {
       // TODO: 判定処理を呼び出す
 
       // 以下はサンプルとして記述している
-      popupMenusModule.popupMenus.judgeWebPage()
+      
+      // 現在タブのホスト名を取得する
+      const hostname = await chrome.tabs.query({active: true, currentWindow: true})
+                                .then(res => new URL(res[0].url).hostname)
+
+      // 判定処理を呼び出す
+      popupMenusModule.popupMenus.judgeWebPage('google.com')
+      //alert(tabs.tab)
       updateSettings({type: 'JUDGE'})
     });
 

@@ -19,3 +19,8 @@ Suggestions and pull requests are welcomed!.
 
 This project was bootstrapped with [Chrome Extension CLI](https://github.com/dutiyesh/chrome-extension-cli)
 
+## API Usage
+Please put api key in `.env` file as
+```
+API_KEY=[your api key]
+```
