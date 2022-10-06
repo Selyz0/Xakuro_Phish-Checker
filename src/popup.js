@@ -40,8 +40,17 @@ const popupMenusModule = require('./popupMenusScript.js');
       const hostname = await chrome.tabs.query({active: true, currentWindow: true})
                                 .then(res => new URL(res[0].url).hostname)
 
+      console.log(hostname)
+
       // 判定処理を呼び出す
-      popupMenusModule.popupMenus.judgeWebPage('google.com')
+      const data = await popupMenusModule.popupMenus.judgeWebPage(hostname)
+
+      document.querySelector('#result').innerHTML = `
+      Domain: ${data.domain} <br>
+      Score: ${data.abuseConfidenceScore}
+      `
+
+      console.log(data)
       //alert(tabs.tab)
       updateSettings({type: 'JUDGE'})
     });
