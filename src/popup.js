@@ -34,8 +34,6 @@ const popupMenusModule = require('./popupMenusScript.js');
     document.getElementById('judgingBtn').addEventListener('click', async () => {
       // TODO: 判定処理を呼び出す
 
-      // 以下はサンプルとして記述している
-      
       // 現在タブのホスト名を取得する
       const hostname = await chrome.tabs.query({active: true, currentWindow: true})
                                 .then(res => new URL(res[0].url).hostname)
@@ -55,44 +53,79 @@ const popupMenusModule = require('./popupMenusScript.js');
       updateSettings({type: 'JUDGE'})
     });
 
-    document.getElementById('savingBtn').addEventListener('click', () => {
-      // TODO: 保存処理を呼び出す
-
+    document.getElementById('savingBtn').addEventListener('click', async () => {
+      // タブ情報取得
+      let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      // デバッガアタッチ
+      chrome.debugger.attach({ tabId: tab.id }, '1.3', async () => {
+        console.log('attach - ok');
+    
+        // デバッガ起動待機
+        await new Promise((resolve) => setTimeout(resolve, 500));
+    
+        // レイアウト情報取得
+        chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.getLayoutMetrics', {}, (metrics) => {
+          // スクリーンショットパラメータ作成
+          const params = {
+            format: 'png',
+            quality: 50,
+            clip: {
+            x: 0,
+            y: 0,
+            width:  metrics.cssContentSize.width,
+            height: metrics.cssContentSize.height,
+            scale: 1
+            },
+            captureBeyondViewport: true
+          }
+      
+          // スクリーンショット撮影
+          chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.captureScreenshot', params, (result) => {
+            // 画像保存
+            const downloadEle = document.createElement('a');
+            downloadEle.href = 'data:image/png;base64,' + result.data;
+            downloadEle.download = 'screenshot.png';
+            downloadEle.click()
+      
+            // デバッガでタッチ
+            chrome.debugger.detach({ tabId: tab.id }, () => {
+              console.log('detach ok')
+            });
+          });
+        });
+      
       // 以下はサンプルとして記述している
-      popupMenusModule.popupMenus.saveWebPageInfo()
-      updateSettings({type: 'SAVE'})
+      //popupMenusModule.popupMenus.saveWebPageInfo()
+      //updateSettings({type: 'SAVE'})
+      });
     });
 
-    document.getElementById('settingsBtn').addEventListener('click', () => {
+    document.getElementById('settingsBtn').addEventListener('click', async (e) => {
       // TODO: 保存先変更処理を呼び出す
+      popupMenusModule.getDirectoryTest();
+      console.log('push Settingbtn');
 
       // 以下はサンプルとして記述している
-      popupMenusModule.popupMenus.changeSettings()
+      popupMenusModule.popupMenus.changeSettings();
+      updateSettings({type: 'SETTING'});
       updateSettings({type: 'SETTING'})
+      uriManager.get((saveLocation) => {
+        if (type == 'JUDGE'){
+          saveLocation = 'Judge'
+        } else if (type == 'SAVE'){
+          saveLocation = 'Save'
+        } else if (type == 'SETTING'){
+          saveLocation = 'Setting'
+        }
+
+        uriManager.set(saveLocation, () => {
+          document.getElementById('saveLocation').innerHTML = saveLocation;
+        })
+      });
+
+      return true;
     });
-  }
-
-  /**
-   * `saveLocation`の表示を更新
-   * @param {string} type 押されたボタンの種類 
-   * @returns {boolean} 無意味な値
-   */
-  function updateSettings({ type }) {
-    uriManager.get((saveLocation) => {
-      if (type == 'JUDGE'){
-        saveLocation = 'Judge'
-      } else if (type == 'SAVE'){
-        saveLocation = 'Save'
-      } else if (type == 'SETTING'){
-        saveLocation = 'Setting'
-      }
-
-      uriManager.set(saveLocation, () => {
-        document.getElementById('saveLocation').innerHTML = saveLocation;
-      })
-    });
-
-    return true;
   }
 
   /**

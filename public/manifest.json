@@ -19,7 +19,9 @@
   "permissions": [
     "storage",
     "contextMenus",
-    "activeTab"
+    "activeTab",
+    "scripting",
+    "debugger"
   ],
   "content_scripts": [
     {
