@@ -1,4 +1,4 @@
-# <img src="public/icons/icon_48.png" width="45" align="left"> Mws 2022
+# <img src="public/icons/icon_48.png" width="45" align="left"> Xakuro Phish-Chekcer
 
 Xakuro Pshish-Checker
 
