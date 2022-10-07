@@ -1,7 +1,6 @@
 'use strict';
 
-//const html2canvas = require('./html2canvas.js')
-//const ss = require('./screenshot.js')
+const md5 = require('js-md5');
 
 /**
  * サンプル（不要そう）
@@ -23,57 +22,44 @@ chrome.runtime.sendMessage(
     }
 );
 
-function getScreenshot (tab) {
-    chrome.debugger.attach ({tabId: tab.id}, '1.3', function () {
-        console.log('attached')
-
-        chrome.debugger.sendCommand({tabId: tab.id}, 'Page.getLayoutMetrics', {}, (metrics) => {
-            const params = {
-                format: 'png',
-                quality: 50,
-                clip: {
-                    x: 0,
-                    y: 0,
-                    width: metrics.cssContentSize.width,
-                    height: metrics. cssContentSize.height,
-                    scale: 1
-                },
-                capturaBeyondViewport: true
-            }
-
-            chrome.debugger.sendCommand({tabId: tab.id}, 'Page.captureScreenshot', params, (result) => {
-                const downloadEle = document.createElement('a')
-                downloadEle.href = 'data:image/png;base64,' + result.data;
-                downloadEle.download = 'screenshot.png'
-                downloadEle.click()
-
-                chrome.debugger.detach({tabId: tab.id}, () => {
-                    console.log('detached')
-                });
-            });
-        });
-    });
-}
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('received Message')
-    if (request.type === 'COUNT') {
-        console.log(`Current count is ${request.payload.count}`);
+    console.log('received Message: ' + request.payload.message)
+
+    console.log("Now tab")
+    var hash = md5.create();
+    hash.update(pageTitle)
+    console.log("Now tab is " + hash.hex())
+
+    if (request.type == 'RENDERSS') {
+        console.log('Try to save SS.')
+        const body = document.body;
+        const sshot = '<a href="" id="xakuro-save-ss" download="' + hash.hex() + '.png"></a>';
+        body.insertAdjacentHTML("beforebegin", sshot);
+        html2canvas(document.body, {
+            onrendered: function(canvas){
+                var imgData = canvas.toDataURL();
+                document.getElementById("xakuro-save-ss").href = imgData;
+                const downloadEle = document.getElementById('xakuro-save-ss')
+                downloadEle.click()
+            }
+        });
         sendResponse({});
-    } else if (request.type == 'LOADEDPAGE') {
-        console.log(request.payload.message)
-        sendResponse({});
-    } else if (request.type == 'SAVEPAGE') {
-        console.log('try to save page')
-        getScreenshot()
-        sendResponse({});
-    } else if (request.type == 'GETDOC') {
+    } else if (request.type == 'SAVESS') {
         console.log('get doc')
         const downloadEle = document.createElement('a')
         downloadEle.href = 'data:image/png;base64,' + request.payload.data.data;
-        downloadEle.download = 'screenshot.png';
+        downloadEle.download = hash.hex() + '.png';
+        downloadEle.click()
+        sendResponse({});
+    } else if (request.type == 'SAVEJSON') {
+        const dljson = '<a href="" id="xakuro-save-json" download="' + hash.hex() + '.json"></a>';
+        document.body.insertAdjacentHTML("beforebegin", dljson);
+        const downloadEle = document.createElement('a')
+        downloadEle.href = 'data:text/json;charset=utf-8,' + JSON.stringify(request.payload.data);
+        downloadEle.download = hash.hex() + '.json';
         downloadEle.click()
         sendResponse({});
     }
+
     return true;
 });

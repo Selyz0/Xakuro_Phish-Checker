@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="jpn">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Xakuro Phish-Checker</title>
+    <p><img id="icon" src="icons/icon_128.png" alt="Xakuro Phish-Checker"></p>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="app">
+      <p class="Extension-label">Xakuro Phish-Checker</p>
+      <div id="saveLocation" class="saveLocation"></div>
+      <div class="button-container">
+        <button id="judgingBtn" class="button">判定</button><br>
+        <button id="savingBtn1" class="button">保存 (debug mode)</button><br>
+        <button id="savingBtn2" class="button">保存 (html2canvas)</button><br>
+        <button id="settingsBtn" class="button">設定</button>
+      </div>
+
+      <hr class="divider" />
+
+      <p class="subtitle"> <code></code></p>
+    </div>
+
+    <script src="popup.js"></script>
+
+    <!--
+      This HTML file opens when you click on icon from the toolbar.
+
+      To begin the development, run `npm run watch`.
+      To create a production bundle, use `npm run build`.
+    -->
+  </body>
+</html>

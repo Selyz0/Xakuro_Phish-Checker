@@ -1,7 +1,5 @@
 'use strict';
 
-const contextMenusModule = require('./contextMenusScript.js')
-
 /**
  * 他スクリプトとの通信
  */
@@ -32,14 +30,29 @@ const contextMenusModule = require('./contextMenusScript.js')
         title: 'MWS-2022'
     });
     chrome.contextMenus.create({
-        id: 'SAVE',
+        id: 'RENDER',
         parentId: 'parent',
         title:  'フィッシングページ情報を保存する'
     });
+    return true
   });
 
   chrome.contextMenus.onClicked.addListener(async (item, tab) => {
+  //chrome.contextMenus.onClicked.addListener(item => {
     console.log(`You clicked ${item.menuItemId} button.`);
+
+    if (item.menuItemId == 'RENDER'){
+      chrome.tabs.sendMessage(
+        tab.id,
+        {
+          type: 'RENDERSS',
+          payload: {
+            message : 'Want a webpage document.',
+          },
+        },
+        (response) => {
+      });
+    }
 
     if (item.menuItemId == 'SAVE'){
       // デバッガアタッチ
@@ -71,7 +84,7 @@ const contextMenusModule = require('./contextMenusScript.js')
             chrome.tabs.sendMessage(
               tab.id,
               {
-                type: 'GETDOC',
+                type: 'SAVESS',
                 payload: {
                   data: result,
                   message : 'Want a webpage document.',
@@ -96,22 +109,22 @@ const contextMenusModule = require('./contextMenusScript.js')
   });
 }
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status != 'complete'){
-    return
-  }
 
-  console.log('Created tab');
-  chrome.tabs.sendMessage(
-    tabId,
-    {
-      type: 'LOADEDPAGE',
-      payload: {
-        message : 'Web page was loaded.',
+/**
+ * 新規タブ作成時に、ポップアップの情報を初期化
+ */
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab){
+  if (changeInfo.status === 'complete') {
+    chrome.tabs.sendMessage(
+      tabId,
+      {
+        type: 'INITIALIZE_POPUP',
+        payload: {
+          message : 'Initialize popup text.',
+        },
       },
-    },
-    (response) => {
-    }
-  );
-  return true
+      (response) => {
+    });
+  }
+  return true;
 });

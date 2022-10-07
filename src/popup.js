@@ -7,15 +7,15 @@ const popupMenusModule = require('./popupMenusScript.js');
   /**
    * 保存先の管理
    */
-  const uriManager = {
+  const judgeManager = {
     get: (cb) => {
-        chrome.storage.sync.get(['uri'], (result) => {
-            cb(result.uri);
+        chrome.storage.sync.get(['judgeResult'], (result) => {
+            cb(result.judgeResult);
         });
     },
     set: (value, cb) => {
         chrome.storage.sync.set({
-            uri: value
+          judgeResult: value
         },
         () => {
             cb();
@@ -25,15 +25,12 @@ const popupMenusModule = require('./popupMenusScript.js');
 
   /**
    * ポップアップの情報を設定
-   * TODO: (必要に応じてメソッド名などの変更)
    * @param {string} initialValue 初期値
    */
   function setupPopupMenus(initialValue = 'undefined') {
-    document.getElementById('saveLocation').innerHTML = initialValue;
+    document.getElementById('judge-result').innerHTML = initialValue;
 
     document.getElementById('judgingBtn').addEventListener('click', async () => {
-      // TODO: 判定処理を呼び出す
-
       // 現在タブのホスト名を取得する
       const hostname = await chrome.tabs.query({active: true, currentWindow: true})
                                 .then(res => new URL(res[0].url).hostname)
@@ -44,88 +41,79 @@ const popupMenusModule = require('./popupMenusScript.js');
       const data = await popupMenusModule.popupMenus.judgeWebPage(hostname)
 
       document.querySelector('#result').innerHTML = `
-      Domain: ${data.domain} <br>
-      Score: ${data.abuseConfidenceScore}
+      ドメイン: ${data.domain} <br>
+      スコア: ${data.abuseConfidenceScore} <br>
+      (通報件数: ${data.totalReports}) <br>
       `
 
       console.log(data)
       //alert(tabs.tab)
-      updateSettings({type: 'JUDGE'})
+      updateResult({type: 'JUDGE', payload: {domain: data.domain, score: data.abuseConfidenceScore, row: data}})
     });
 
-    document.getElementById('savingBtn').addEventListener('click', async () => {
-      // タブ情報取得
-      let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
-      // デバッガアタッチ
-      chrome.debugger.attach({ tabId: tab.id }, '1.3', async () => {
-        console.log('attach - ok');
-    
-        // デバッガ起動待機
-        await new Promise((resolve) => setTimeout(resolve, 500));
-    
-        // レイアウト情報取得
-        chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.getLayoutMetrics', {}, (metrics) => {
-          // スクリーンショットパラメータ作成
-          const params = {
-            format: 'png',
-            quality: 50,
-            clip: {
-            x: 0,
-            y: 0,
-            width:  metrics.cssContentSize.width,
-            height: metrics.cssContentSize.height,
-            scale: 1
+    document.getElementById('savingBtn').addEventListener('click', () => {
+      console.log('Can you save this page?')
+
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          {
+            type: 'RENDERSS',
+            payload: {
+              message: 'Can you save this web page?'
             },
-            captureBeyondViewport: true
-          }
-      
-          // スクリーンショット撮影
-          chrome.debugger.sendCommand({ tabId: tab.id }, 'Page.captureScreenshot', params, (result) => {
-            // 画像保存
-            const downloadEle = document.createElement('a');
-            downloadEle.href = 'data:image/png;base64,' + result.data;
-            downloadEle.download = 'screenshot.png';
-            downloadEle.click()
-      
-            // デバッガでタッチ
-            chrome.debugger.detach({ tabId: tab.id }, () => {
-              console.log('detach ok')
-            });
+          },
+        function (response) {
+        });
+      });
+
+      judgeManager.get((result) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            {
+              type: 'SAVEJSON',
+              payload: {
+                data: result,
+                message: 'Can you save this web page?'
+              },
+            },
+          function (response) {
           });
         });
-      
-      // 以下はサンプルとして記述している
-      //popupMenusModule.popupMenus.saveWebPageInfo()
-      //updateSettings({type: 'SAVE'})
-      });
-    });
-
-    document.getElementById('settingsBtn').addEventListener('click', async (e) => {
-      // TODO: 保存先変更処理を呼び出す
-      popupMenusModule.getDirectoryTest();
-      console.log('push Settingbtn');
-
-      // 以下はサンプルとして記述している
-      popupMenusModule.popupMenus.changeSettings();
-      updateSettings({type: 'SETTING'});
-      updateSettings({type: 'SETTING'})
-      uriManager.get((saveLocation) => {
-        if (type == 'JUDGE'){
-          saveLocation = 'Judge'
-        } else if (type == 'SAVE'){
-          saveLocation = 'Save'
-        } else if (type == 'SETTING'){
-          saveLocation = 'Setting'
-        }
-
-        uriManager.set(saveLocation, () => {
-          document.getElementById('saveLocation').innerHTML = saveLocation;
-        })
-      });
+      })
 
       return true;
     });
+  }
+
+  /**
+   * `saveLocation`の表示を更新
+   * @param {string} type 押されたボタンの種類 
+   * @returns {boolean} 無意味な値
+   */
+  function updateResult({ type, payload }) {
+    if (type == 'JUDGE'){
+      let color = ""
+      if (payload.score < 5){
+        color = '#66FF99';
+      } else if (payload.score < 20){
+        color = '#FFFF66';
+      } else if (payload.score < 40){
+        color = '#FF9933';
+      } else if (payload.score < 60){
+        color = '#FF6600';
+      } else if (payload.score < 100){
+        color = '#FF0000';
+      }
+
+      judgeManager.set(payload.row, () => {});
+      const judgeResult = '危険度: ' + payload.score + ' /100';
+      document.getElementById('judge-result').innerHTML = judgeResult;
+      document.getElementById('judge-result').style.backgroundColor  = color;
+    }
+
+    return true;
   }
 
   /**
@@ -133,15 +121,10 @@ const popupMenusModule = require('./popupMenusScript.js');
    * (初期値が無いなら必要ないかも)
    */
   function restoreSaveLocation() {
-    uriManager.get((saveLocation) => {
-      if (typeof saveLocation === 'undefined') {
-        uriManager.set('NoSetting', () => {
-          setupPopupMenus('NoSetting');
-        });
-      } else {
-        setupPopupMenus(saveLocation);
-      }
+    judgeManager.set('undefined', () => {
+      setupPopupMenus('');
     });
+    return true;
   }
 
   /**

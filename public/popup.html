@@ -2,23 +2,22 @@
 <html lang="jpn">
   <head>
     <meta charset="UTF-8" />
-    <title>Extension Name</title>
+    <title>Xakuro Phish-Checker</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <div class="app">
-      <p class="counter-label">Extension Name</p>
-      <div id="saveLocation" class="saveLocation"></div>
+      <p class="Extension-label">Xakuro Phish-Checker</p>
       <div class="button-container">
-        <button id="judgingBtn" class="button" onclick="judge">判定</button>
+        <button id="judgingBtn" class="button">判定</button>
         <button id="savingBtn" class="button">保存</button>
-        <button id="settingsBtn" class="button">設定</button>
       </div>
 
-      <hr class="divider" />
-
-      <p class="subtitle"> <code></code></p>
-      <div id="result"></div>
+      <div class="judge-container">
+        <div id="judge-result" class="judge-result"></div>
+        <hr class="divider" />
+        <div id="result"></div>
+      </div>
     </div>
 
     <script src="popup.js"></script>

@@ -12,8 +12,8 @@ const config = (env, argv) =>
   merge(common, {
     entry: {
       popup: PATHS.src + '/popup.js',
+      html2canvas: PATHS.src + '/html2canvas.js',
       contentScript: PATHS.src + '/contentScript.js',
-      contextMenusScript: PATHS.src + '/contextMenusScript.js',
       background: PATHS.src + '/background.js',
     },
     devtool: argv.mode === 'production' ? false : 'source-map',

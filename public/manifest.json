@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "MWS-2022-Test",
+  "name": "Xakuro Phish-Checker",
   "version": "0.0.1",
   "description": "フィッシングサイトを対象としたデータ分析のサポートを行います．",
   "icons": {
@@ -13,15 +13,15 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "MWS-2022",
+    "default_title": "Xakuro Phish-Checker",
     "default_popup": "popup.html"
   },
   "permissions": [
     "storage",
     "contextMenus",
-    "activeTab",
+    "debugger",
     "scripting",
-    "debugger"
+    "activeTab"
   ],
   "content_scripts": [
     {
@@ -30,7 +30,8 @@
       ],
       "run_at": "document_idle",
       "js": [
-        "contentScript.js"
+        "contentScript.js",
+        "html2canvas.js"
       ]
     }
   ]
