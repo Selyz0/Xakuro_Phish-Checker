@@ -1,6 +1,5 @@
 # <img src="public/icons/icon_48.png" width="45" align="left"> Xakuro Phish-Chekcer
 
-Xakuro Pshish-Checker
 
 ## 利用環境
 - Google Chrome
