@@ -17,7 +17,7 @@ Xakuro Pshish-Checker
   - AbuseIPDBを利用したアクセス中のWebサイトの危険度判定
   - アクセス中のWebサイトの情報（URL/ドメイン/各種分析結果）の保存・ダウンロード
 
-## Install
+## インストール手順
 
 1. .zipファイルとしてダウンロード
 2. .zipファイルを解凍
